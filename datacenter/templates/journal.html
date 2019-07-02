@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name=“robots” content=“noindex,nofollow”>
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Security screen">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Score</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  </head>
+
+  <body>
+    <div class="container">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url "classes" %}">На главную</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url "class_info" letter=class_letter year=class_year %}">К классу</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url "schedule" year=class_year letter=class_letter %}">К расписанию</a>
+          </li>
+        </ul>
+        <a href="{% url "journal" letter=class_letter year=class_year subject_id=subject.id%}?week={{previous_week_number}}&year={{previous_year_number}}">На предыдущую неделю</a>
+        <a href="{% url "journal" letter=class_letter year=class_year subject_id=subject.id%}?week={{next_week_number}}&year={{next_year_number}}">На следующую неделю</a>
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Дата</th>
+              {% for day in days %}
+                <th scope="col" style="text-align:center;">{{day}}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for schoolkid, schoolkid_marks in marks.items %}
+                <tr>
+                    <th scope="row">{{schoolkid.full_name}}</th>
+                    {% for day, marks in schoolkid_marks.items %}
+                        <td style="text-align:center;">{% for mark in marks %}{{mark.points}} {%endfor%}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  </body>
+</html>

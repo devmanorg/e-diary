@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+</head>
+<body>
+    <ul class="nav">
+      <li class="nav-item">
+        <a class="nav-link active" href="{% url "classes" %}">На главную</a>
+      </li>
+    </ul>
+    <div class="container">
+        <h2>Выберите свой класс:</h2>
+        {% for unique_class, years_list in classes.items %}
+            <ul class="list-inline">
+                {% for year in years_list %}
+                    <li class="list-inline-item">
+                        <a href="{% url "class_info" letter=unique_class year=year%}">{{year}}{{unique_class}}</a>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endfor %}
+    </div>
+
+
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  </body>
+</html>

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="ru">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name=“robots” content=“noindex,nofollow”>
+    <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
+    <meta name="description" content="Security screen">
+    <meta name="author" content="">
+    <link rel="icon" href="favicon.ico">
+
+    <title>Score</title>
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+  </head>
+
+  <body>
+    <div class="container">
+        <ul class="nav">
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url "classes" %}">На главную</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url "class_info" letter=class_letter year=class_year %}">К классу</a>
+          </li>
+          <li class="nav-item">
+            <a class="nav-link active" href="{% url "schedule" year=class_year letter=class_letter %}">К расписанию</a>
+          </li>
+        </ul>
+        <h2>{{schoolkid.full_name}}</h2>
+        <a href="{% url "schoolkid" schoolkid_id=schoolkid.id %}?week={{previous_week_number}}&year={{previous_year_number}}">На предыдущую неделю</a>
+        <a href="{% url "schoolkid" schoolkid_id=schoolkid.id %}?week={{next_week_number}}&year={{next_year_number}}">На следующую неделю</a>
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Дата</th>
+              {% for day in days %}
+                <th scope="col" style="text-align:center;">{{day}}</th>
+              {% endfor %}
+            </tr>
+          </thead>
+          <tbody>
+            {% for subject, subject_marks in marks.items %}
+                <tr>
+                    <th scope="row">{{subject.title}}</th>
+                    {% for day, marks_that_day in subject_marks.items %}
+                        <td style="text-align:center;">{% for mark in marks_that_day %}{{mark.points}} {%endfor%}</td>
+                    {% endfor %}
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <h2>Рекоммендации:</h2>
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Дата</th>
+              <th scope="col">Учитель</th>
+              <th scope="col">Предмет</th>
+              <th scope="col">Текст</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for commendation in all_commendations %}
+                <tr>
+                    <th scope="row">{{commendation.date}}</th>
+                    <td>{{commendation.teacher.full_name}}</td>
+                    <td>{{commendation.subject.title}}</td>
+                    <td>{{commendation.text}}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        <h2>Замечания:</h2>
+        <table class="table table-striped">
+          <thead class="thead-dark">
+            <tr>
+              <th scope="col">Дата</th>
+              <th scope="col">Учитель</th>
+              <th scope="col">Предмет</th>
+              <th scope="col">Текст</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for chastisement in all_chastisements %}
+                <tr>
+                    <th scope="row">{{chastisement.date}}</th>
+                    <td>{{chastisement.teacher.full_name}}</td>
+                    <td>{{chastisement.subject.title}}</td>
+                    <td>{{chastisement.text}}</td>
+                </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+    </div>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+  </body>
+</html>
