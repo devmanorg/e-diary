@@ -1,199 +1,193 @@
+from django.http import Http404
+from django.shortcuts import get_list_or_404
+from django.shortcuts import get_object_or_404
+from django.shortcuts import render
+from isoweek import Week
+from itertools import groupby
+
 from datacenter.models import Commendation
 from datacenter.models import Lesson
 from datacenter.models import Mark
 from datacenter.models import Schoolkid
 from datacenter.models import Subject
 from datacenter.models import Сhastisement
-from django.shortcuts import render
-from isoweek import Week
 
 
-DAY_FORMATTER = '%A %d/%m/%Y'
+def get_iso_week_from_params(get_params):
+    week_number = get_params.get('week', '')
+    year_number = get_params.get('year', '')
+
+    if week_number.isdigit() and year_number.isdigit():
+        week_number = int(week_number)
+        year_number = int(year_number)
+        asked_iso_week = Week(year_number, week_number)
+    else:
+        # default weekday for that dvmn lesson
+        current_iso_week = Week(2019, 1)
+        asked_iso_week = current_iso_week
+    return asked_iso_week
+
+
+def format_day_title(date):
+    day_formatter = '%A %d/%m/%Y'
+    # Не стал прикручивать translate ради 7 переводов
+    weekday_translations = {
+        "Monday": "Понедельник",
+        "Tuesday": "Вторник",
+        "Wednesday": "Среда",
+        "Thursday": "Четверг",
+        "Friday": "Пятница",
+        "Saturday": "Суббота",
+        "Sunday": "Воскресение",
+    }
+    formatted_day_title = date.strftime(day_formatter)
+    for eng_titile, ru_title in weekday_translations.items():
+        formatted_day_title = formatted_day_title.replace(eng_titile, ru_title)
+    return formatted_day_title
 
 
 def view_classes(request):
-    classes = Schoolkid.objects.all().values_list(
-        "year_of_study", "year_of_study_group").distinct()
-    unique_class_groups = set([group for year, group in classes])
-    unique_class_years = set([year for year, group in classes])
-    serialized_classes = {
-        unique_group: sorted([
-            year for year, group
-            in classes if group == unique_group
-        ])
-        for unique_group in sorted(list(unique_class_groups))
-    }
+    classes = Schoolkid.objects.all().values_list("year_of_study", "group_letter").distinct()
+    classes_groups = groupby(sorted(classes), key=lambda pair: pair[0])
+    serialized_classes = {class_year: list(classes) for class_year, classes in classes_groups}
+    unique_class_letters = sorted(set([letter for year, letter in classes]))
     context = {
-        "unique_class_years": unique_class_years,
+        "unique_class_letters": unique_class_letters,
         "classes": serialized_classes
     }
     return render(request, 'classes.html', context)
 
 
 def view_class_info(request, year, letter):
-    schoolkids_that_class = Schoolkid.objects.filter(
-        year_of_study=year, year_of_study_group=letter)
+    schoolkids = get_list_or_404(Schoolkid, year_of_study=year, group_letter=letter)
     context = {
         "year": year,
         "letter": letter,
-        "schoolkids": sorted(schoolkids_that_class, key=lambda kid: kid.full_name)
+        "schoolkids": sorted(schoolkids, key=lambda kid: kid.full_name)
     }
     return render(request, 'class_info.html', context)
 
 
 def view_schedule(request, year, letter):
     # по горизонтали время уроков, по вертикали — название дней, в пересечении subject
-    iso_week_number = request.GET.get('week', None)
-    iso_year_number = request.GET.get('year', None)
-
-    if iso_week_number is None or iso_year_number is None:
-        # current_iso_week = Week.thisweek()
-        # default weekday for that dvmn lesson
-        current_iso_week = Week(2019, 1)
-        asked_iso_week = current_iso_week
-    else:
-        iso_week_number = int(iso_week_number)
-        iso_year_number = int(iso_year_number)
-        asked_iso_week = Week(iso_year_number, iso_week_number)
-    iso_week_number = asked_iso_week.week
-    iso_year_number = asked_iso_week.year
-    asked_iso_week = Week(iso_year_number, iso_week_number)
-    lessons_that_class = list(Lesson.objects.filter(
+    asked_iso_week = get_iso_week_from_params(request.GET)
+    lessons_on_week = list(Lesson.objects.filter(
         year_of_study=year,
-        year_of_study_group=letter,
-        date__week=iso_week_number,
-        date__year=iso_year_number,
-    ))
-    lesson_times = ["8:00-8:40", "8:50-9:30",
-                    "9:40-10:20", "10:35-11:15", "11:25-12:05"]
-    schedule = {}
+        group_letter=letter,
+        date__week=asked_iso_week.week,
+        date__year=asked_iso_week.year,
+    ).order_by('date', 'timeslot'))
+    if not lessons_on_week:
+        raise Http404
+
+    lessons_by_day = {}
     for day in asked_iso_week.days():
-        lessons_that_day = [
+        formatted_day_title = format_day_title(day)
+        lessons_by_day[formatted_day_title] = [
             lesson for lesson
-            in lessons_that_class if lesson.date == day
+            in lessons_on_week if lesson.date == day
         ]
-        that_day_schedule = {}
-        for slot, lesson_time in enumerate(lesson_times, 1):
-            lessons_that_time = [lesson for lesson in lessons_that_day
-                                 if lesson.timeslot == slot]
-            that_day_schedule[lesson_time] = lessons_that_time
-        formatted_day_title = day.strftime(DAY_FORMATTER)
+    schedule = {}
+    for formatted_day_title, lessons in lessons_by_day.items():
+        that_day_schedule_blank = [None]*len(Lesson.TIMESLOTS_SCHEDULE)
+        that_day_schedule = that_day_schedule_blank.copy()
+        for lesson in lessons:
+            that_day_schedule[lesson.timeslot - 1] = lesson
+        if that_day_schedule == that_day_schedule_blank:
+            that_day_schedule = []
         schedule[formatted_day_title] = that_day_schedule
+
     previous_week = asked_iso_week - 1
     next_week = asked_iso_week + 1
     context = {
         "class_year": year,
         "class_letter": letter,
-        "next_week_number": next_week.week,
-        "previous_week_number": previous_week.week,
-        "next_year_number": next_week.year,
-        "previous_year_number": previous_week.year,
+        "next_week": next_week,
+        "previous_week": previous_week,
         "schedule": schedule,
-        "timeslots": lesson_times
+        "timeslots": Lesson.TIMESLOTS_SCHEDULE
     }
     return render(request, 'schedule.html', context)
 
 
 def view_journal(request, year, letter, subject_id):
     # столбцы — дни, строки — ученики, пересечения — оценки
-    iso_week_number = request.GET.get('week', None)
-    iso_year_number = request.GET.get('year', None)
-    if iso_week_number is None or iso_year_number is None:
-        # current_iso_week = Week.thisweek()
-        # default weekday for that dvmn lesson
-        current_iso_week = Week(2019, 1)
-        asked_iso_week = current_iso_week
-    else:
-        iso_week_number = int(iso_week_number)
-        iso_year_number = int(iso_year_number)
-        asked_iso_week = Week(iso_year_number, iso_week_number)
-    iso_week_number = asked_iso_week.week
-    iso_year_number = asked_iso_week.year
-    schoolkids_that_class = Schoolkid.objects.filter(
-        year_of_study=year, year_of_study_group=letter).order_by("full_name")
-    subject = Subject.objects.get(id=subject_id)
+    asked_iso_week = get_iso_week_from_params(request.GET)
+    subject = get_object_or_404(Subject, id=subject_id)
+    schoolkids = Schoolkid.objects.filter(
+        year_of_study=year, group_letter=letter).order_by("full_name")
+    if not schoolkids:
+        raise Http404
     marks_that_week = Mark.objects.filter(
-        subject=subject, date__week=iso_week_number, date__year=iso_year_number)
+        subject=subject, created__week=asked_iso_week.week, created__year=asked_iso_week.year)
+
     all_marks = {}
-    for schoolkid in schoolkids_that_class:
+    for schoolkid in schoolkids:
         schoolkid_marks = {}
         for day in asked_iso_week.days():
             that_day_that_schoolkid_marks = [
                 mark for mark in marks_that_week
-                if mark.date == day and mark.schoolkid == schoolkid
+                if mark.created == day and mark.schoolkid == schoolkid
             ]
-            formatted_day_title = day.strftime(DAY_FORMATTER)
+            formatted_day_title = format_day_title(day)
             schoolkid_marks[formatted_day_title] = that_day_that_schoolkid_marks
         all_marks[schoolkid] = schoolkid_marks
+
     previous_week = asked_iso_week - 1
     next_week = asked_iso_week + 1
     context = {
         "class_year": year,
         "class_letter": letter,
-        "next_week_number": next_week.week,
-        "previous_week_number": previous_week.week,
-        "next_year_number": next_week.year,
-        "previous_year_number": previous_week.year,
+        "next_week": next_week,
+        "previous_week": previous_week,
         "marks": all_marks,
         "subject": subject,
-        "days": [day.strftime(DAY_FORMATTER) for day in asked_iso_week.days()]
+        "days": [format_day_title(day) for day in asked_iso_week.days()]
     }
     return render(request, 'journal.html', context)
 
 
 def view_schoolkid(request, schoolkid_id):
     # успевамость по предметам, строки — предметы, столбцы — дни
-    iso_week_number = request.GET.get('week', None)
-    iso_year_number = request.GET.get('year', None)
-    if iso_week_number is None or iso_year_number is None:
-        # current_iso_week = Week.thisweek()
-        # default weekday for that dvmn lesson
-        current_iso_week = Week(2019, 1)
-        asked_iso_week = current_iso_week
-    else:
-        iso_week_number = int(iso_week_number)
-        iso_year_number = int(iso_year_number)
-        asked_iso_week = Week(iso_year_number, iso_week_number)
-    iso_week_number = asked_iso_week.week
-    iso_year_number = asked_iso_week.year
-    schoolkid = Schoolkid.objects.get(id=schoolkid_id)
+    asked_iso_week = get_iso_week_from_params(request.GET)
+
+    schoolkid = get_object_or_404(Schoolkid, id=schoolkid_id)
     subject_ids = Lesson.objects.filter(
         year_of_study=schoolkid.year_of_study,
-        year_of_study_group=schoolkid.year_of_study_group,
-        date__week=iso_week_number,
-        date__year=iso_year_number,
+        group_letter=schoolkid.group_letter,
+        date__week=asked_iso_week.week,
+        date__year=asked_iso_week.year,
     ).values_list("subject__id")
     subjects = Subject.objects.filter(id__in=subject_ids)
+
     all_marks = {}
     for subject in subjects:
         subject_marks = {}
         marks_that_subject = Mark.objects.filter(
             subject=subject, schoolkid=schoolkid,
-            date__week=iso_week_number, date__year=iso_year_number)
+            created__week=asked_iso_week.week, created__year=asked_iso_week.year)
         for day in asked_iso_week.days():
-            that_day_that_subject_marks = [mark for mark in marks_that_subject if mark.date == day]
-            formatted_day_title = day.strftime(DAY_FORMATTER)
+            that_day_that_subject_marks = [mark for mark in marks_that_subject if mark.created == day]
+            formatted_day_title = format_day_title(day)
             subject_marks[formatted_day_title] = that_day_that_subject_marks
         all_marks[subject] = subject_marks
+
     all_commendations = Commendation.objects.filter(
         schoolkid=schoolkid
-    ).order_by("date")
+    ).order_by("created")
     all_chastisements = Сhastisement.objects.filter(
         schoolkid=schoolkid
-    ).order_by("date")
+    ).order_by("created")
+
     previous_week = asked_iso_week - 1
     next_week = asked_iso_week + 1
     context = {
-        "next_week_number": next_week.week,
-        "previous_week_number": previous_week.week,
-        "next_year_number": next_week.year,
-        "previous_year_number": previous_week.year,
-        "class_year": schoolkid.year_of_study,
-        "class_letter": schoolkid.year_of_study_group,
+        "next_week": next_week,
+        "previous_week": previous_week,
         "schoolkid": schoolkid,
         "marks": all_marks,
         "all_commendations": all_commendations,
         "all_chastisements": all_chastisements,
-        "days": [day.strftime(DAY_FORMATTER) for day in asked_iso_week.days()]
+        "days": [format_day_title(day) for day in asked_iso_week.days()]
     }
     return render(request, 'schoolkid_info.html', context)

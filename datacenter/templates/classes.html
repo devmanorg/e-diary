@@ -2,28 +2,39 @@
 <html>
 <head>
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet">
 </head>
 <body>
-    <ul class="nav">
-      <li class="nav-item">
-        <a class="nav-link active" href="{% url "classes" %}">На главную</a>
-      </li>
-    </ul>
-    <div class="container">
-        <h2>Выберите свой класс:</h2>
-        {% for unique_class, years_list in classes.items %}
-            <ul class="list-inline">
-                {% for year in years_list %}
-                    <li class="list-inline-item">
-                        <a href="{% url "class_info" letter=unique_class year=year%}">{{year}}{{unique_class}}</a>
-                    </li>
-                {% endfor %}
-            </ul>
+  <ul class="nav" style="background-color: #e3f2fd;">
+    <li class="nav-item">
+      <a class="nav-link active" href="{% url "classes" %}">На главную</a>
+    </li>
+  </ul>
+  <div class="container">
+    <h2 class="mt-2 mb-4">Информация по классам:</h2>
+    <table class="table table-striped mt-2 mb-4">
+      <thead class="thead-dark">
+        <tr>
+          <th scope="col" style="text-align:center;">Год обучения</th>
+          {% for letter in unique_class_letters%}
+            <th scope="col" style="text-align:center;">{{letter}}</th>
+          {% endfor %}
+        </tr>
+      </thead>
+      <tbody>
+        {% for year_, year_letter_pairs in classes.items %}
+          <tr>
+            <th scope="row" style="text-align:center;">{{year_}}</th>
+            {% for year, letter in year_letter_pairs %}
+              <td style="text-align:center;"><span style="font-size: 150%" class="align-middle">{{year}}{{letter}}</span>&nbsp&nbsp<a href="{% url "class_info" letter=letter year=year%}"><i class="material-icons align-middle" style="font-size: 100%">people</i>&nbspученики</a> <a href="{% url "schedule" year=year letter=letter%}"><i class="material-icons align-middle" style="font-size: 100%">schedule</i>&nbspрасписание</a></td>
+            {% endfor %}
+          </tr>
         {% endfor %}
-    </div>
-
-
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-  </body>
+      </tbody>
+    </table>
+  </div>
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
+</body>
 </html>

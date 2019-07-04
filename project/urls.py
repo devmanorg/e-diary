@@ -1,5 +1,6 @@
-from datacenter import views
 from django.conf.urls import url
+
+from datacenter import views
 
 
 urlpatterns = [

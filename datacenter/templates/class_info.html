@@ -4,15 +4,17 @@
   <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
 </head>
 <body>
-  <ul class="nav">
+  <ul class="nav" style="background-color: #e3f2fd;">
     <li class="nav-item">
       <a class="nav-link active" href="{% url "classes" %}">На главную</a>
     </li>
+    <li class="nav-item">
+      <a class="nav-link active" href="{% url "schedule" year=year letter=letter%}">К расписанию {{year}}{{letter}}</a>
+    </li>
   </ul>
   <div class="container">
-    <h2>Ученики {{year}}{{letter}}</h2>
-    <a href="{% url "schedule" year=year letter=letter%}">Расписание для {{year}}{{letter}}</a>
-    <table class="table table-striped">
+    <h2 class="mt-2 mb-4">Ученики {{year}}{{letter}}</h2>
+    <table class="table table-striped mt-2 mb-4">
       <thead class="thead-dark">
         <tr>
           <th scope="col" style="text-align:center;">#</th>

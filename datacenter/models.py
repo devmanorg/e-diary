@@ -2,72 +2,90 @@ from django.db import models
 
 
 class Schoolkid(models.Model):
-    full_name = models.CharField(max_length=200)
-    birthday = models.DateField(null=True)
-    year_started_education = models.IntegerField(null=True)
-    year_of_study = models.IntegerField(null=True)
-    year_of_study_group = models.CharField(max_length=1, null=True)
+    """Ученик"""
+    full_name = models.CharField('ФИО', max_length=200)
+    birthday = models.DateField('день рождения', null=True)
+
+    entry_year = models.IntegerField('год начала обучения', null=True)
+    year_of_study = models.IntegerField('год обучения', null=True)
+    group_letter = models.CharField('литера класса', max_length=1, null=True)
 
     def __str__(self):
-        return f"{self.full_name} {self.year_of_study}{self.year_of_study_group}"
+        return f"{self.full_name} {self.year_of_study}{self.group_letter}"
 
 
 class Teacher(models.Model):
-    full_name = models.CharField(max_length=200)
-    birthday = models.DateField(blank=True, null=True)
+    """Учитель"""
+    full_name = models.CharField('ФИО', max_length=200)
+    birthday = models.DateField('день рождения', null=True)
 
 
 class Subject(models.Model):
-    title = models.CharField(max_length=200)
-    year_of_study = models.IntegerField(null=True)
+    """Предмет: математика, русский язык и пр. — привязан к году обучения."""
+    title = models.CharField('название', max_length=200)
+    year_of_study = models.IntegerField('год обучения', null=True, db_index=True)
 
     def __str__(self):
         return f"{self.title} {self.year_of_study} класса"
 
 
 class Lesson(models.Model):
-    # title = models.CharField(max_length=200)
-    year_of_study = models.IntegerField()
-    year_of_study_group = models.CharField(max_length=1)
-    timeslot = models.IntegerField()
-    room = models.CharField(max_length=50)
-    date = models.DateField()
-    subject = models.ForeignKey(Subject, null=True)
-    teacher = models.ForeignKey(Teacher, null=True)
+    """Один урок в расписании занятий."""
+
+    TIMESLOTS_SCHEDULE = [
+        "8:00-8:40",
+        "8:50-9:30",
+        "9:40-10:20",
+        "10:35-11:15",
+        "11:25-12:05"
+    ]
+
+    year_of_study = models.IntegerField(db_index=True)
+    group_letter = models.CharField('литера класса', max_length=1, db_index=True)
+
+    subject = models.ForeignKey(Subject, null=True, verbose_name='предмет', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, null=True, verbose_name='учитель', on_delete=models.CASCADE)
+
+    timeslot = models.IntegerField('слот', db_index=True, help_text='Номер слота в расписании уроков на этот день.')
+    room = models.CharField('класс', db_index=True, help_text='Класс где проходят занятия.', max_length=50)
+    date = models.DateField('дата', db_index=True)
 
     def __str__(self):
-        return f"{self.subject.title} {self.year_of_study}{self.year_of_study_group}"
+        return f"{self.subject.title} {self.year_of_study}{self.group_letter}"
 
 
 class Mark(models.Model):
-    points = models.IntegerField()
-    teacher_note = models.TextField(null=True)
-    date = models.DateField()
-    schoolkid = models.ForeignKey(Schoolkid)
-    subject = models.ForeignKey(Subject)
-    teacher = models.ForeignKey(Teacher)
+    """Оценка, поставленная учителем ученику."""
+    points = models.IntegerField('оценка')
+    teacher_note = models.TextField('комментарий', null=True)
+    created = models.DateField('дата')
+    schoolkid = models.ForeignKey(Schoolkid, verbose_name='ученик', on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, verbose_name='предмет', on_delete=models.CASCADE)
+    teacher = models.ForeignKey(Teacher, verbose_name='учитель', on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.points} {self.schoolkid.fullname}"
+        return f"{self.points} {self.schoolkid.full_name}"
 
 
 class Сhastisement(models.Model):
-    text = models.TextField()
-    date = models.DateField()
-    schoolkid = models.ForeignKey(Schoolkid)
-    subject = models.ForeignKey(Subject, null=True)
-    teacher = models.ForeignKey(Teacher)
+    """Запись с замачанием от учителя ученику."""
+    text = models.TextField('замечание')
+    created = models.DateField('дата', db_index=True)
+    schoolkid = models.ForeignKey(Schoolkid, verbose_name='ученик', on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, verbose_name='предмет', null=True, on_delete=models.SET_NULL)
+    teacher = models.ForeignKey(Teacher, verbose_name='учитель', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.schoolkid.full_name}"
 
 
 class Commendation(models.Model):
-    text = models.TextField()
-    date = models.DateField()
-    schoolkid = models.ForeignKey(Schoolkid)
-    subject = models.ForeignKey(Subject)
-    teacher = models.ForeignKey(Teacher)
+    """Запись с похвалой от учителя ученику."""
+    text = models.TextField('похвала')
+    created = models.DateField('дата', db_index=True)
+    schoolkid = models.ForeignKey(Schoolkid, verbose_name='ученик', on_delete=models.CASCADE)
+    subject = models.ForeignKey(Subject, verbose_name='предмет', null=True, on_delete=models.SET_NULL)
+    teacher = models.ForeignKey(Teacher, verbose_name='учитель', on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.schoolkid.full_name}"
