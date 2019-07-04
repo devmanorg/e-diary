@@ -19,6 +19,9 @@ class Teacher(models.Model):
     full_name = models.CharField('ФИО', max_length=200)
     birthday = models.DateField('день рождения', null=True)
 
+    def __str__(self):
+        return f"{self.full_name}"
+
 
 class Subject(models.Model):
     """Предмет: математика, русский язык и пр. — привязан к году обучения."""
