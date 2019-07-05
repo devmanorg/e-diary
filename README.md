@@ -36,5 +36,9 @@
 - Скачайте код
 - Установите зависимости командой `pip install -r requirements.txt`
 - Положите базу данных рядом с `manage.py`
+- Создайте файл `.env` рядом с `manage.py`. Определите в нём переменные:
+    - `SECRET_KEY`
+    - `DEBUG`
+    - `DATABASE_NAME` — путь до базы данных, например: `schoolbase.sqlite3`
 - Пропишите путь до файла с базой в `/project/settings.py` вместо `PLACE_NAME_HERE`.
 - Запустите сервер командой `python3 manage.py runserver`
