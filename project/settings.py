@@ -6,7 +6,7 @@ load_dotenv()
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.getenv("DATABASE_NAME", "blank.sqlite3"),
+        'NAME': os.getenv("DATABASE_NAME", "schoolbase.sqlite3"),
     }
 }
 
