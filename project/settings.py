@@ -3,15 +3,15 @@ import os
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': 'PLACE_NAME_HERE',
+        'NAME': os.getenv("DATABASE_NAME", "blank.sqlite3"),
     }
 }
 
 INSTALLED_APPS = ['datacenter']
 
-SECRET_KEY = 'REPLACE_ME'
+SECRET_KEY = os.getenv("SECRET_KEY", "REPLACE_ME")
 
-DEBUG = True
+DEBUG = os.getenv("DEBUG", "").lower() in ['yes', '1', 'true']
 
 ROOT_URLCONF = "project.urls"
 
