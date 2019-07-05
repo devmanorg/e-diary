@@ -1,5 +1,8 @@
 import os
 
+from dotenv import load_dotenv
+load_dotenv()
+
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
@@ -11,7 +14,7 @@ INSTALLED_APPS = ['datacenter']
 
 SECRET_KEY = os.getenv("SECRET_KEY", "REPLACE_ME")
 
-DEBUG = os.getenv("DEBUG", "").lower() in ['yes', '1', 'true']
+DEBUG = os.getenv("DEBUG", "true").lower() in ['yes', '1', 'true']
 
 ROOT_URLCONF = "project.urls"
 
