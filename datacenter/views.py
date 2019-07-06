@@ -38,7 +38,7 @@ def format_day_title(date):
         "Thursday": "Четверг",
         "Friday": "Пятница",
         "Saturday": "Суббота",
-        "Sunday": "Воскресение",
+        "Sunday": "Воскресенье",
     }
     formatted_day_title = date.strftime(day_formatter)
     for eng_titile, ru_title in weekday_translations.items():
