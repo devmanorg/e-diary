@@ -34,6 +34,6 @@ USE_L10N = True
 
 LANGUAGE_CODE = 'ru-ru'
 
-TIME_ZONE = Europe/Moscow
+TIME_ZONE = 'Europe/Moscow'
 
 USE_TZ = True
