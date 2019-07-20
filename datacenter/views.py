@@ -10,7 +10,7 @@ from datacenter.models import Lesson
 from datacenter.models import Mark
 from datacenter.models import Schoolkid
 from datacenter.models import Subject
-from datacenter.models import Сhastisement
+from datacenter.models import Chastisement
 
 
 def get_iso_week_from_params(get_params):
@@ -175,7 +175,7 @@ def view_schoolkid(request, schoolkid_id):
     all_commendations = Commendation.objects.filter(
         schoolkid=schoolkid
     ).order_by("created")
-    all_chastisements = Сhastisement.objects.filter(
+    all_chastisements = Chastisement.objects.filter(
         schoolkid=schoolkid
     ).order_by("created")
 

@@ -70,7 +70,7 @@ class Mark(models.Model):
         return f"{self.points} {self.schoolkid.full_name}"
 
 
-class Сhastisement(models.Model):
+class Chastisement(models.Model):
     """Запись с замачанием от учителя ученику."""
     text = models.TextField('замечание')
     created = models.DateField('дата', db_index=True)
