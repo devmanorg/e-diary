@@ -71,7 +71,7 @@ class Mark(models.Model):
 
 
 class Chastisement(models.Model):
-    """Запись с замачанием от учителя ученику."""
+    """Запись с замечанием от учителя ученику."""
     text = models.TextField('замечание')
     created = models.DateField('дата', db_index=True)
     schoolkid = models.ForeignKey(Schoolkid, verbose_name='ученик', on_delete=models.CASCADE)
