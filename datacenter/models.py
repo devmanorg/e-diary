@@ -2,7 +2,7 @@ from django.db import models
 
 
 class Schoolkid(models.Model):
-    """Ученик"""
+    """Ученик."""
     full_name = models.CharField('ФИО', max_length=200)
     birthday = models.DateField('день рождения', null=True)
 
@@ -15,7 +15,7 @@ class Schoolkid(models.Model):
 
 
 class Teacher(models.Model):
-    """Учитель"""
+    """Учитель."""
     full_name = models.CharField('ФИО', max_length=200)
     birthday = models.DateField('день рождения', null=True)
 
