@@ -46,11 +46,26 @@ class Lesson(models.Model):
     year_of_study = models.IntegerField(db_index=True)
     group_letter = models.CharField('литера класса', max_length=1, db_index=True)
 
-    subject = models.ForeignKey(Subject, null=True, verbose_name='предмет', on_delete=models.CASCADE)
-    teacher = models.ForeignKey(Teacher, null=True, verbose_name='учитель', on_delete=models.CASCADE)
+    subject = models.ForeignKey(
+        Subject,
+        null=True,
+        verbose_name='предмет',
+        on_delete=models.CASCADE)
+    teacher = models.ForeignKey(
+        Teacher,
+        null=True,
+        verbose_name='учитель',
+        on_delete=models.CASCADE)
 
-    timeslot = models.IntegerField('слот', db_index=True, help_text='Номер слота в расписании уроков на этот день.')
-    room = models.CharField('класс', db_index=True, help_text='Класс где проходят занятия.', max_length=50)
+    timeslot = models.IntegerField(
+        'слот',
+        db_index=True,
+        help_text='Номер слота в расписании уроков на этот день.')
+    room = models.CharField(
+        'класс',
+        db_index=True,
+        max_length=50,
+        help_text='Класс где проходят занятия.')
     date = models.DateField('дата', db_index=True)
 
     def __str__(self):
@@ -62,9 +77,19 @@ class Mark(models.Model):
     points = models.IntegerField('оценка')
     teacher_note = models.TextField('комментарий', null=True)
     created = models.DateField('дата')
-    schoolkid = models.ForeignKey(Schoolkid, verbose_name='ученик', on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, verbose_name='предмет', on_delete=models.CASCADE)
-    teacher = models.ForeignKey(Teacher, verbose_name='учитель', on_delete=models.CASCADE)
+
+    schoolkid = models.ForeignKey(
+        Schoolkid,
+        verbose_name='ученик',
+        on_delete=models.CASCADE)
+    subject = models.ForeignKey(
+        Subject,
+        verbose_name='предмет',
+        on_delete=models.CASCADE)
+    teacher = models.ForeignKey(
+        Teacher,
+        verbose_name='учитель',
+        on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.points} {self.schoolkid.full_name}"
@@ -74,9 +99,20 @@ class Chastisement(models.Model):
     """Запись с замечанием от учителя ученику."""
     text = models.TextField('замечание')
     created = models.DateField('дата', db_index=True)
-    schoolkid = models.ForeignKey(Schoolkid, verbose_name='ученик', on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, verbose_name='предмет', null=True, on_delete=models.SET_NULL)
-    teacher = models.ForeignKey(Teacher, verbose_name='учитель', on_delete=models.CASCADE)
+
+    schoolkid = models.ForeignKey(
+        Schoolkid,
+        verbose_name='ученик',
+        on_delete=models.CASCADE)
+    subject = models.ForeignKey(
+        Subject,
+        verbose_name='предмет',
+        null=True,
+        on_delete=models.SET_NULL)
+    teacher = models.ForeignKey(
+        Teacher,
+        verbose_name='учитель',
+        on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.schoolkid.full_name}"
@@ -86,9 +122,20 @@ class Commendation(models.Model):
     """Запись с похвалой от учителя ученику."""
     text = models.TextField('похвала')
     created = models.DateField('дата', db_index=True)
-    schoolkid = models.ForeignKey(Schoolkid, verbose_name='ученик', on_delete=models.CASCADE)
-    subject = models.ForeignKey(Subject, verbose_name='предмет', null=True, on_delete=models.SET_NULL)
-    teacher = models.ForeignKey(Teacher, verbose_name='учитель', on_delete=models.CASCADE)
+
+    schoolkid = models.ForeignKey(
+        Schoolkid,
+        verbose_name='ученик',
+        on_delete=models.CASCADE)
+    subject = models.ForeignKey(
+        Subject,
+        verbose_name='предмет',
+        null=True,
+        on_delete=models.SET_NULL)
+    teacher = models.ForeignKey(
+        Teacher,
+        verbose_name='учитель',
+        on_delete=models.CASCADE)
 
     def __str__(self):
         return f"{self.schoolkid.full_name}"
