@@ -8,10 +8,10 @@ class Schoolkid(models.Model):
 
     entry_year = models.IntegerField('год начала обучения', null=True)
     year_of_study = models.IntegerField('год обучения', null=True)
-    group_letter = models.CharField('литера класса', max_length=1, null=True)
+    group_letter = models.CharField('литера класса', max_length=1, blank=True)
 
     def __str__(self):
-        return f"{self.full_name} {self.year_of_study}{self.group_letter}"
+        return f'{self.full_name} {self.year_of_study}{self.group_letter}'
 
 
 class Teacher(models.Model):
@@ -20,31 +20,35 @@ class Teacher(models.Model):
     birthday = models.DateField('день рождения', null=True)
 
     def __str__(self):
-        return f"{self.full_name}"
+        return f'{self.full_name}'
 
 
 class Subject(models.Model):
     """Предмет: математика, русский язык и пр. — привязан к году обучения."""
     title = models.CharField('название', max_length=200)
-    year_of_study = models.IntegerField('год обучения', null=True, db_index=True)
+    year_of_study = models.IntegerField(
+        'год обучения', null=True, db_index=True,
+    )
 
     def __str__(self):
-        return f"{self.title} {self.year_of_study} класса"
+        return f'{self.title} {self.year_of_study} класса'
 
 
 class Lesson(models.Model):
     """Один урок в расписании занятий."""
 
     TIMESLOTS_SCHEDULE = [
-        "8:00-8:40",
-        "8:50-9:30",
-        "9:40-10:20",
-        "10:35-11:15",
-        "11:25-12:05"
+        '8:00-8:40',
+        '8:50-9:30',
+        '9:40-10:20',
+        '10:35-11:15',
+        '11:25-12:05'
     ]
 
     year_of_study = models.IntegerField(db_index=True)
-    group_letter = models.CharField('литера класса', max_length=1, db_index=True)
+    group_letter = models.CharField(
+        'литера класса', max_length=1, db_index=True,
+    )
 
     subject = models.ForeignKey(
         Subject,
@@ -69,13 +73,13 @@ class Lesson(models.Model):
     date = models.DateField('дата', db_index=True)
 
     def __str__(self):
-        return f"{self.subject.title} {self.year_of_study}{self.group_letter}"
+        return f'{self.subject.title} {self.year_of_study}{self.group_letter}'
 
 
 class Mark(models.Model):
     """Оценка, поставленная учителем ученику."""
     points = models.IntegerField('оценка')
-    teacher_note = models.TextField('комментарий', null=True)
+    teacher_note = models.TextField('комментарий', blank=True)
     created = models.DateField('дата')
 
     schoolkid = models.ForeignKey(
@@ -92,7 +96,7 @@ class Mark(models.Model):
         on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.points} {self.schoolkid.full_name}"
+        return f'{self.points} {self.schoolkid.full_name}'
 
 
 class Chastisement(models.Model):
@@ -115,7 +119,7 @@ class Chastisement(models.Model):
         on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.schoolkid.full_name}"
+        return f'{self.schoolkid.full_name}'
 
 
 class Commendation(models.Model):
@@ -138,4 +142,4 @@ class Commendation(models.Model):
         on_delete=models.CASCADE)
 
     def __str__(self):
-        return f"{self.schoolkid.full_name}"
+        return f'{self.schoolkid.full_name}'
