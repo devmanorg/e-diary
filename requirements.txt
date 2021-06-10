@@ -1,4 +1,4 @@
-Django==2.2.20
+Django==2.2.24
 pytz==2017.2
 isoweek==1.3.*
 environs==5.2.1
